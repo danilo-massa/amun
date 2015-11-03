@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# /etc/init.d/amun -- startup script for amun honeypot
+# Author: Danilo Massa <danilo.massa@tin.it> - converted to Ubuntu
+# Author: Miguel Cabrerizo <doncicuto@gmail.com> - original author
+# Amun Honeypot Web: http://amunhoneypot.sourceforge.net
+#
+### BEGIN INIT INFO
+# Provides:          amun
+# Required-Start:    $network $remote_fs $named
+# Required-Stop:     $network $remote_fs $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts amun
+# Description: Amun Honeypot init script for Ubuntu
+### END INIT INFO
+
+
+DESC="Amun Honeypot service"
+NAME=amun
+DAEMON=/opt/amun/amun_server.py
+PIDFILE=/var/run/$NAME.pid
+
+. /lib/lsb/init-functions
+
+case "$1" in
+
+start) 
+        echo -n "Starting $DESC: "
+        start-stop-daemon --start --exec $DAEMON --background --pidfile $PIDFILE --make-pidfile
+        echo "$NAME."
+        ;;
+
+stop)
+        echo -n "Stopping $DESC: "
+        start-stop-daemon --stop --pidfile $PIDFILE
+        echo "$NAME."
+        ;;
+
+restart)
+        echo -n "Restarting $DESC: " 
+        start-stop-daemon --stop --pidfile $PIDFILE
+        sleep 1
+        start-stop-daemon --start --exec $DAEMON --background --pidfile $PIDFILE --make-pidfile
+        echo "$NAME."
+        ;;
+
+status)
+        status_of_proc -p $PIDFILE amun amun && exit 0 || exit $?
+    ;;
+*)
+        echo "Usage: /etc/init.d/amun {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
