@@ -18,7 +18,7 @@ except ImportError:
 import amun_logging
 import amun_config_parser
 import datetime
-import pprint
+import json
 
 class log:
 	def __init__(self):
@@ -26,29 +26,45 @@ class log:
 			self.log_name = "Log Json"
 			conffile = "conf/log-json.conf"
 			config = amun_config_parser.AmunConfigParser(conffile)
+			self.sensorid = config.getSingleValue("sensorid")
 			self.fname = config.getSingleValue("file")
 			del config
 		except KeyboardInterrupt:
 			raise
 
+        def writeLog(self, data):
+            with open(self.fname, 'a') as outfile:
+                 json.dump(data, outfile)
+                 outfile.write("\n")
+            outfile.close()
+
 	def initialConnection(self, attackerIP, attackerPort, victimIP, victimPort, identifier, initialConnectionsDict, loLogger):
-#		pass
                data = {}
                data['timestamp'] = datetime.datetime.now().isoformat()
+               data['sensorid'] = self.sensorid
                data['event_type'] = "INITIAL_CONNECTION"
                data['attackerIP'] = attackerIP
                data['attackerPort'] = attackerPort
                data['victimIP'] = victimIP
                data['victimPort'] = victimPort
                data['identifier'] = identifier
-               data['initialConnectionsDict'] = initialConnectionsDict
-               data['loLogger'] = loLogger
-    
-               pprint.pprint(data);
+
+               # Empty fields    
+               data['attackerID'] = None
+               data['vulnName'] = None
+               data['downloadMethod'] = None
+               data['downloadURL'] = None
+               data['shellcodeName'] = None
+               data['fexists'] = None
+               data['filelength'] = None
+               data['md5hash'] = None
+              
+               self.writeLog(data) 
     
 	def incoming(self, attackerIP, attackerPort, victimIP, victimPort, vulnName, timestamp, downloadMethod, loLogger, attackerID, shellcodeName):
                data = {}
                data['timestamp'] = timestamp
+               data['sensorid'] = self.sensorid
                data['event_type'] = "INCOMING_CONNECTION"
                data['attackerIP'] = attackerIP
                data['attackerPort'] = attackerPort
@@ -58,25 +74,36 @@ class log:
                data['downloadMethod'] = downloadMethod
                data['attackerID'] = attackerID
                data['shellcodeName'] = shellcodeName
-               data['loLogger'] = loLogger
-               
-               pprint.pprint(data);
 
-	def successfullSubmission(self, attackerIP, attackerPort, victimIP, downloadURL, md5hash, data, filelength, downMethod, loLogger, vulnName, fexists):
+               # Empty fields   
+               data['identifier'] = None
+               data['downloadURL'] = None
+               data['md5hash'] = None
+               data['filelength'] = None
+               data['fexists'] = None 
+               
+               self.writeLog(data) 
+
+	def successfullSubmission(self, attackerIP, attackerPort, victimIP, downloadURL, md5hash, data, filelength, downloadMethod, loLogger, vulnName, fexists):
                data = {}
                data['timestamp'] = datetime.datetime.now().isoformat()
+               data['sensorid'] = self.sensorid
                data['event_type'] = "SUCCESSFULL_SUBMISSION"
                data['attackerIP'] = attackerIP
                data['attackerPort'] = attackerPort
                data['victimIP'] = victimIP
                data['downloadURL'] = downloadURL
                data['md5hash'] = md5hash
-               data['data'] = data
                data['filelength'] = filelength
-               data['downMethod'] = downMethod
+               data['downloadMethod'] = downloadMethod
                data['vulnName'] = vulnName
                data['fexists'] = fexists
-               data['loLogger'] = loLogger
 
-               pprint.pprint(data);
 
+               # Empty fields   
+               data['attackerID'] = None
+               data['identifier'] = None
+               data['shellcodeName'] = None
+               data['victimPort'] = None 
+
+               self.writeLog(data) 
